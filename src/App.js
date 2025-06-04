@@ -4,7 +4,13 @@ import MemberTable from './Componets/ShowMemberData';
 import PaymentForm from './Componets/PaymentSummary';
 import ReceiptTable from './Componets/ReceptTable';
 import Dashboard from './Componets/Desboard';
-// import PaymentForm1 from './Componets/PaymentForm1';
+import YearlyPaymentForm from './Componets/addPaymentForm';
+import YearlySummary from './Componets/YearlySummary';
+import AnnualPaymentsTable from './Componets/AnnualPaymentRecord';
+import PaymentReceiptTable from './Componets/ReceptTable';
+import OtherPaymentsTable from './Componets/showOtherDetails';
+import TotalPaymentsList from './Componets/YearlyPaymentList';
+
 
 function App() {
   return (
@@ -12,9 +18,15 @@ function App() {
       <MemberForm />
       <MemberTable />
       <PaymentForm />
-      <ReceiptTable />
+      {/* <ReceiptTable /> */}
       <Dashboard />
+      <YearlyPaymentForm />
+      {/* <YearlySummary /> */}
+      <AnnualPaymentsTable />
       {/* <PaymentForm1 /> */}
+      <PaymentReceiptTable />
+      <OtherPaymentsTable />
+      <TotalPaymentsList />
     </div>
   );
 }

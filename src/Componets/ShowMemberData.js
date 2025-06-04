@@ -6,7 +6,28 @@ const MemberTable = () => {
     const [members, setMembers] = useState([]);
     const [filteredMembers, setFilteredMembers] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
+
+    // State for filters per column (initially empty)
+    const [filters, setFilters] = useState({
+        MemberName: '',
+        CompanyName: '',
+        ContactNumber: '',
+        Email: '',
+        GSTNo: '',
+        UdhyamAadhar: '',
+        RegistrationDate: '',
+        MemberSince: '',
+        Address1: '',
+        Address2: '',
+        Area: '',
+        City: '',
+        State: '',
+        Status: '',  // We'll filter based on 'IsActive' but showing text status
+        UpdatedDate: '',
+        Owner: '',
+        Category: '',
+        PrinterCategory: '',
+    });
 
     const fetchMembers = () => {
         axios.get('http://localhost:5000/Ohkla/getMember')
@@ -23,16 +44,35 @@ const MemberTable = () => {
     }, []);
 
     useEffect(() => {
-        const lowerSearch = searchTerm.toLowerCase();
-        const result = members.filter(member =>
-            Object.values(member).some(
-                val =>
-                    val &&
-                    val.toString().toLowerCase().includes(lowerSearch)
-            )
-        );
+        // Filter members according to filters
+        let result = members.filter(member => {
+            // Check all filters; if filter value is empty, ignore
+            return Object.entries(filters).every(([key, filterVal]) => {
+                if (!filterVal) return true; // no filter on this column
+
+                let memberVal = '';
+
+                if (key === 'Status') {
+                    memberVal = member.IsActive ? 'active' : 'inactive';
+                } else if (key === 'RegistrationDate' || key === 'UpdatedDate') {
+                    memberVal = member[key]?.substring(0, 10) || '';
+                } else {
+                    memberVal = member[key] || '';
+                }
+
+                return memberVal.toString().toLowerCase().includes(filterVal.toLowerCase());
+            });
+        });
+
         setFilteredMembers(result);
-    }, [searchTerm, members]);
+    }, [filters, members]);
+
+    const handleFilterChange = (e, column) => {
+        setFilters(prev => ({
+            ...prev,
+            [column]: e.target.value
+        }));
+    };
 
     const handleEdit = (member) => {
         setSelectedMember(member);
@@ -44,24 +84,12 @@ const MemberTable = () => {
 
     const handleUpdate = () => {
         setSelectedMember(null);
-        fetchMembers(); // Refresh after update
+        fetchMembers();
     };
 
     return (
         <div className="container-fluid mt-4">
             <h2 className="text-center mb-4">All Member Details</h2>
-
-            {!selectedMember && (
-                <div className="mb-3 text-end">
-                    <input
-                        type="text"
-                        className="form-control w-25 d-inline"
-                        placeholder="Search all fields..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-            )}
 
             {selectedMember ? (
                 <EditMemberForm
@@ -75,22 +103,188 @@ const MemberTable = () => {
                         <thead className="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Member Name</th>
-                                <th>Company</th>
-                                <th>Contact</th>
-                                <th>Email</th>
-                                <th>GST No</th>
-                                <th>Udhyam Aadhar</th>
-                                <th>Registration Date</th>
-                                <th>Member Since</th>
-                                <th>Address 1</th>
-                                <th>Address 2</th>
-                                <th>Area</th>
-                                <th>City</th>
-                                <th>State</th>
-                                <th>Status</th>
-                                <th>Updated Date</th>
-                                <th>Owner</th>
+                                <th>
+                                    Member Name
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.MemberName}
+                                        onChange={(e) => handleFilterChange(e, 'MemberName')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Company
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.CompanyName}
+                                        onChange={(e) => handleFilterChange(e, 'CompanyName')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Contact
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.ContactNumber}
+                                        onChange={(e) => handleFilterChange(e, 'ContactNumber')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Email
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Email}
+                                        onChange={(e) => handleFilterChange(e, 'Email')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    GST No
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.GSTNo}
+                                        onChange={(e) => handleFilterChange(e, 'GSTNo')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Udhyam Aadhar
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.UdhyamAadhar}
+                                        onChange={(e) => handleFilterChange(e, 'UdhyamAadhar')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Registration Date
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.RegistrationDate}
+                                        onChange={(e) => handleFilterChange(e, 'RegistrationDate')}
+                                        placeholder="YYYY-MM-DD"
+                                    />
+                                </th>
+                                <th>
+                                    Member Since
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.MemberSince}
+                                        onChange={(e) => handleFilterChange(e, 'MemberSince')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Address 1
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Address1}
+                                        onChange={(e) => handleFilterChange(e, 'Address1')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Address 2
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Address2}
+                                        onChange={(e) => handleFilterChange(e, 'Address2')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Area
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Area}
+                                        onChange={(e) => handleFilterChange(e, 'Area')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    City
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.City}
+                                        onChange={(e) => handleFilterChange(e, 'City')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    State
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.State}
+                                        onChange={(e) => handleFilterChange(e, 'State')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Category
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Category}
+                                        onChange={(e) => handleFilterChange(e, 'Category')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Printer Category
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.PrinterCategory}
+                                        onChange={(e) => handleFilterChange(e, 'PrinterCategory')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+                                <th>
+                                    Status
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Status}
+                                        onChange={(e) => handleFilterChange(e, 'Status')}
+                                        placeholder="Active/Inactive"
+                                    />
+                                </th>
+                                <th>
+                                    Updated Date
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.UpdatedDate}
+                                        onChange={(e) => handleFilterChange(e, 'UpdatedDate')}
+                                        placeholder="YYYY-MM-DD"
+                                    />
+                                </th>
+                                <th>
+                                    Owner
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm mt-1"
+                                        value={filters.Owner}
+                                        onChange={(e) => handleFilterChange(e, 'Owner')}
+                                        placeholder="Search..."
+                                    />
+                                </th>
+
+
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -116,6 +310,9 @@ const MemberTable = () => {
                                         <td>{member.Area}</td>
                                         <td>{member.City}</td>
                                         <td>{member.State}</td>
+                                        <td>{member.Category}</td>
+                                        <td>{member.PrinterCategory}</td>
+
                                         <td>
                                             {member.IsActive ? (
                                                 <span className="badge bg-success">Active</span>
